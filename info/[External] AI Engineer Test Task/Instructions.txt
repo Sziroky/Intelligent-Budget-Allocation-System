@@ -1,0 +1,43 @@
+# AI Engineer Lead — Take-Home Test Task
+
+## The Scenario
+You are building the decision core of a budget allocation system for a performance marketing team. The team manages paid media spend across 12 campaigns on 3 platforms (Google, Meta, TikTok). Every week, a strategist decides how to redistribute a fixed weekly budget of **$85,000**.
+
+The problem: the strategist's decision logic lives entirely in their head. Your job is to build a system that can replicate the quality of that reasoning — and be honest when it can't.
+
+## Provided Materials
+1. `campaigns.json`: 12 current campaigns with performance metrics. Total current spend is exactly $85,000.
+2. `strategy_brief.txt`: A natural language brief from the VP of Growth (imprecise, occasionally contradictory).
+3. `historical_eval_cases.json`: 3 simplified scenarios with human-labeled ground truth for testing.
+
+## The Task
+Build a system that ingests the campaign data and the strategy brief, reasons through a budget reallocation, and outputs a structured allocation plan with justification. 
+
+### The 3 Financial Principles (Must be Honored)
+1. **Opportunity Cost:** Headline ROAS alone is not sufficient. A campaign with strong ROAS but a high audience saturation signal is not the same as one with room to scale. The output must distinguish between the two and explain what is being given up.
+2. **Diversification vs. Concentration:** Calculate a Herfindahl–Hirschman Index (HHI) for your proposed allocation (sum of squared spend shares across the campaigns). If HHI > 0.25, flag the risk and provide a second, alternative diversified allocation.
+3. **Risk Management:** You must explicitly flag three specific risks per campaign where applicable:
+   - `volatility`: High ROAS but a declining 4-week trend.
+   - `platform_concentration`: No single platform should receive >55% of the total budget.
+   - `below_min_spend`: A campaign funded below its `min_viable_spend`. You must either fund it fully or pause it ($0). Half-funding is a risk.
+
+### Expected Output Format
+Your system must output a structured JSON containing:
+- `allocations`: An array per campaign with `campaign_id`, `recommended_spend` (int), `delta_vs_current` (int), `action` (scale/hold/reduce/pause), `opportunity_cost_note`, `risk_flags`, and `rationale`.
+- `summary`: A top-level block with `concentration_score` (HHI), `concentration_warning` (bool), `alternative_diversified_allocation` (if warned), `total_allocated` (must be exactly 85000), and `unresolved_conflicts` (list any contradictions in the brief that could not be resolved).
+
+### The Eval Harness (Required)
+Build your own evaluation script using `historical_eval_cases.json`. The harness must score your system's output on:
+- **Allocation accuracy:** within ±10% of ground-truth spend.
+- **Action agreement:** does the system agree on scale/hold/reduce/pause?
+- **Risk flag recall:** did the system catch the same risk flags?
+- **Total budget constraint:** hard fail if total ≠ $85,000.
+
+### Stretch Goals
+1. **Constraint correction:** When the initial LLM output doesn't sum exactly to $85,000, use a deterministic code fallback to mathematically normalize it—don't just retry the prompt.
+2. **Conflict resolution:** For entries in `unresolved_conflicts`, generate a clarifying question for a human-in-the-loop.
+
+### Deliverables
+1. Working code (GitHub repo or ZIP).
+2. A `README.md` covering setup, design decisions, explicit vs. inferred assumptions, and what you'd do differently with more time.
+3. The Eval harness output logs showing scores against the 3 ground-truth cases.

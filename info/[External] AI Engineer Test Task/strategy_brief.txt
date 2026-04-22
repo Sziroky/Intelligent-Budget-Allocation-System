@@ -1,0 +1,16 @@
+SUBJECT: Weekly Allocation Strategy - Q3 Push
+FROM: VP of Growth
+
+Hi Team,
+
+We have an exactly $85,000 budget to deploy this week. I need you to run the numbers and reallocate it based on the following rules.
+
+First, efficiency is our top priority. Focus spend strictly on what's working. If a campaign is a top 3 performer by ROAS, I want you to aggressively consolidate budget into it to maximize short-term returns. Feed the winners.
+
+Second, we are under-invested in upper-funnel growth on TikTok. TikTok prospecting is critical for Q4. I want us to heavily scale up our TikTok prospecting campaigns to capture new audiences, regardless of their current ROAS. 
+
+Third, our CAC is getting out of control. As a hard rule across the board: do not scale up any campaign if its current CPA is over $50.00. We have to force the algorithms to be efficient.
+
+Lastly, stop running campaigns on pennies. If a campaign is live, it must be funded at or above its minimum viable spend threshold. If it isn't, turn it off. Also, don't forget to manage our risk—if a campaign's trend is declining, I don't want us scaling it.
+
+Looking forward to the allocation plan. Make sure you highlight the trade-offs we're making!

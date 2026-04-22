@@ -1,0 +1,9 @@
+[project]
+name = "delvedeeper"
+version = "0.1.0"
+description = "This is a Test Task Repository for DelveDeeper AI Enginner position."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.13.3",
+]

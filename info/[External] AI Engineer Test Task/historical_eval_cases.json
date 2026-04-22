@@ -1,0 +1,43 @@
+[
+  {
+    "eval_case_id": "case_1_min_viable_spend",
+    "description": "Tests Principle 3. A campaign is funded below its minimum viable spend. The strategist chose to pause it to free up budget.",
+    "total_budget": 85000,
+    "input_campaigns": [
+      { "campaign_id": "google_search_retargeting", "platform": "Google", "current_weekly_spend": 82000, "roas": 3.0, "4_week_roas_trend": "flat", "audience_saturation_signal": 0.4, "min_viable_spend": 5000, "platform_level_budget_cap": 85000 },
+      { "campaign_id": "tiktok_display_prospecting", "platform": "TikTok", "current_weekly_spend": 3000, "roas": 1.5, "4_week_roas_trend": "flat", "audience_saturation_signal": 0.1, "min_viable_spend": 6000, "platform_level_budget_cap": 85000 }
+    ],
+    "ground_truth_output": {
+      "google_search_retargeting": { "action": "scale", "target_spend": 85000, "expected_risk_flags": [] },
+      "tiktok_display_prospecting": { "action": "pause", "target_spend": 0, "expected_risk_flags": ["below_min_spend"] }
+    }
+  },
+  {
+    "eval_case_id": "case_2_opportunity_cost_and_saturation",
+    "description": "Tests Principle 1. A campaign has high ROAS but maxed out saturation. Strategist reduced it despite the high top-line number to scale an unsaturated campaign.",
+    "total_budget": 85000,
+    "input_campaigns": [
+      { "campaign_id": "meta_retargeting_core", "platform": "Meta", "current_weekly_spend": 55000, "roas": 5.8, "4_week_roas_trend": "declining", "audience_saturation_signal": 0.98, "min_viable_spend": 5000, "platform_level_budget_cap": 85000 },
+      { "campaign_id": "google_prospecting_broad", "platform": "Google", "current_weekly_spend": 30000, "roas": 2.5, "4_week_roas_trend": "rising", "audience_saturation_signal": 0.20, "min_viable_spend": 3000, "platform_level_budget_cap": 85000 }
+    ],
+    "ground_truth_output": {
+      "meta_retargeting_core": { "action": "reduce", "target_spend": 40000, "expected_risk_flags": ["volatility"] },
+      "google_prospecting_broad": { "action": "scale", "target_spend": 45000, "expected_risk_flags": [] }
+    }
+  },
+  {
+    "eval_case_id": "case_3_platform_concentration",
+    "description": "Tests Principle 2 & 3. Meta has the top three campaigns. Naive math suggests allocating everything to Meta. Strategist enforced the 55% cap ($46,750).",
+    "total_budget": 85000,
+    "input_campaigns": [
+      { "campaign_id": "meta_1", "platform": "Meta", "current_weekly_spend": 25000, "roas": 4.5, "4_week_roas_trend": "flat", "audience_saturation_signal": 0.5, "min_viable_spend": 5000, "platform_level_budget_cap": 85000 },
+      { "campaign_id": "meta_2", "platform": "Meta", "current_weekly_spend": 25000, "roas": 4.2, "4_week_roas_trend": "flat", "audience_saturation_signal": 0.4, "min_viable_spend": 5000, "platform_level_budget_cap": 85000 },
+      { "campaign_id": "google_1", "platform": "Google", "current_weekly_spend": 35000, "roas": 2.1, "4_week_roas_trend": "flat", "audience_saturation_signal": 0.3, "min_viable_spend": 5000, "platform_level_budget_cap": 85000 }
+    ],
+    "ground_truth_output": {
+      "meta_1": { "action": "reduce", "target_spend": 23375, "expected_risk_flags": ["platform_concentration"] },
+      "meta_2": { "action": "reduce", "target_spend": 23375, "expected_risk_flags": ["platform_concentration"] },
+      "google_1": { "action": "scale", "target_spend": 38250, "expected_risk_flags": [] }
+    }
+  }
+]
