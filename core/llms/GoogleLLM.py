@@ -18,6 +18,9 @@ class CampaignAnalysisSchema(BaseModel):
     campaign_id: str = Field(
         description="The unique identifier of the campaign being analyzed."
     )
+    priority: int = Field(
+        description="A score from 1 (lowest priority) to 10 (highest priority) representing the strategic importance of this campaign based *only* on the brief's instructions."
+    )
     is_mentioned: bool = Field(
         description="True if the campaign is mentioned in the brief (explicitly by name or implicitly by platform/type)."
     )
@@ -38,7 +41,6 @@ class CampaignAnalysisSchema(BaseModel):
         description="A detailed explanation of why the action was chosen, citing both statistics and specific instructions from the brief."
     )
 
-
 class AnalysisResponseSchema(BaseModel):
     analyses: List[CampaignAnalysisSchema] = Field(
         description="A collection of structured analyses for the provided campaigns."
@@ -51,7 +53,7 @@ class Gemini:
         if not api_key:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
         self.client = genai.Client(api_key=api_key)
-        self.model_id = "gemini-2.0-flash"
+        self.model_id = "gemini-2.5-flash"
 
         # Load prompts from YAML
         prompt_path = Path(__file__).parent / "prompts.yaml"

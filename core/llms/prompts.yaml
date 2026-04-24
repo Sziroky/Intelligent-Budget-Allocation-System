@@ -12,10 +12,11 @@ analyze_campaigns: |
   {campaigns}
 
   # Instructions
-  1. **Identify Mentions**: Check if a campaign is mentioned explicitly or falls under a mentioned category (e.g., 'TikTok prospecting').
-  2. **Detect Conflicts**: Flag violations of "hard rules" (e.g., "do not scale if CPA > $50").
-  3. **Recommend Action**: Choose the most logical action based on both the brief's priority and the campaign's current performance.
-  4. **Provide Rationale**: Explicitly mention metrics and brief quotes in your reasoning.
+  1. **Assign Priority**: Assign a strategic priority score from 1 (lowest) to 10 (highest) based *only* on the brief. A specific, explicit instruction (e.g., "heavily scale up our TikTok prospecting") should get a high score (8-10). A general instruction (e.g., "Focus spend on what's working") applied to a specific campaign should get a mid-range score (4-7). If a campaign is not mentioned or implied, give it a low score (1-3).
+  2. **Identify Mentions**: Check if a campaign is mentioned explicitly or falls under a mentioned category.
+  3. **Detect Conflicts**: Flag violations of "hard rules" (e.g., "do not scale if CPA > $50").
+  4. **Recommend Action**: Choose the most logical action based on both the brief's priority and the campaign's current performance.
+  5. **Provide Rationale**: Explicitly mention metrics and brief quotes in your reasoning.
 
   # Output Format
   Return the analysis as a structured JSON object according to the schema.

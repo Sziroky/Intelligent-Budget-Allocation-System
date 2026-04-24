@@ -1,4 +1,4 @@
-from core.agent.GoogleLLM import Gemini
+from core.llms.GoogleLLM import Gemini
 
 
 def test_gemini_integration():
