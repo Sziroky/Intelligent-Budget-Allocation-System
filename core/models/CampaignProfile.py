@@ -41,6 +41,7 @@ class BriefMention(BaseModel):
     is_mentioned: bool
     quote: Optional[str] = None
     semantic_analysis: Optional[str] = None
+    priority: int = 1
 
 
 class CampaignProfile(BaseModel):
@@ -63,6 +64,9 @@ class CampaignProfile(BaseModel):
     )
     current_weekly_spend: float = Field(
         description="Current weekly spend of the campaign."
+    )
+    audience_saturation_signal: float = Field(
+        description="The raw audience saturation signal (0-1)."
     )
     # Campaign Statistic and z-scores
     roas_zscore: Optional[float] = Field(description="Z-score for ROAS")
