@@ -56,8 +56,8 @@ def saturation_to_grade(signal: float) -> SaturationGrade:
 
 def create_campaigns_statistics(campaigns: CampaignsData) -> CampaignsStatistics:
     # Create List out of ROAS and CPA stored in CampaignsData
-    roas_values = [campaign.roas for campaign in campaigns.campaigns]
-    cpa_values = [campaign.cpa for campaign in campaigns.campaigns]
+    roas_values = [campaign.roas or 0.0 for campaign in campaigns.campaigns]
+    cpa_values = [campaign.cpa or 0.0 for campaign in campaigns.campaigns]
 
     return CampaignsStatistics(
         total_campaigns=len(campaigns.campaigns),
@@ -74,9 +74,9 @@ def create_campaign_profiles(
     profiles = []
     for campaign in campaigns.campaigns:
         roas_z = calc_zscore(
-            campaign.roas, statistics.average_roas, statistics.std_roas
+            campaign.roas or 0.0, statistics.average_roas, statistics.std_roas
         )
-        cpa_z = calc_zscore(campaign.cpa, statistics.average_cpa, statistics.std_cpa)
+        cpa_z = calc_zscore(campaign.cpa or 0.0, statistics.average_cpa, statistics.std_cpa)
 
         profile = CampaignProfile(
             campaign_id=campaign.campaign_id,
@@ -84,6 +84,7 @@ def create_campaign_profiles(
             min_viable_spend=campaign.min_viable_spend,
             platform_level_budget_cap=campaign.platform_level_budget_cap,
             current_weekly_spend=campaign.current_weekly_spend,
+            audience_saturation_signal=campaign.audience_saturation_signal,
             roas_zscore=round(roas_z, 2),
             cpa_zscore=round(cpa_z, 2),
             roas_trend=campaign.four_week_roas_trend.value,
@@ -114,6 +115,7 @@ def enrich_profiles_with_llm_insights(
                 is_mentioned=analysis.is_mentioned,
                 quote=analysis.quote,
                 semantic_analysis=analysis.semantic_analysis,
+                priority=analysis.priority,
             )
             profile.conflicts_in_brief = analysis.conflicts_in_brief
             profile.recommended_action = analysis.recommended_action
