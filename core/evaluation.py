@@ -15,6 +15,7 @@ class GroundTruthOutput(BaseModel):
     target_spend: int
     expected_risk_flags: List[str] = Field(default_factory=list)
 
+
 class EvalCase(BaseModel):
     eval_case_id: str
     description: str
@@ -26,9 +27,10 @@ class EvalCase(BaseModel):
 # --- Scoring Logic ---
 class EvaluationScores(BaseModel):
     budget_constraint_passed: bool
-    allocation_accuracy: float # Percentage of campaigns within ±10%
-    action_agreement: float # Percentage of correct actions
-    risk_flag_recall: float # Average recall across all campaigns
+    allocation_accuracy: float  # Percentage of campaigns within ±10%
+    action_agreement: float  # Percentage of correct actions
+    risk_flag_recall: float  # Average recall across all campaigns
+
 
 def score_allocation(
     generated_result: FinalResult, ground_truth: EvalCase
@@ -36,7 +38,7 @@ def score_allocation(
     """
     Scores a generated allocation plan against a ground-truth evaluation case.
     """
-    # 1. Budget Constraint Score
+    # 1. Budget Constraint Score - If its 85 000
     budget_constraint_passed = (
         generated_result.summary.total_allocated == ground_truth.total_budget
     )
@@ -77,7 +79,11 @@ def score_allocation(
         else:
             spend_lower_bound = truth_data.target_spend * 0.9
             spend_upper_bound = truth_data.target_spend * 1.1
-            if spend_lower_bound <= generated_data.recommended_spend <= spend_upper_bound:
+            if (
+                spend_lower_bound
+                <= generated_data.recommended_spend
+                <= spend_upper_bound
+            ):
                 allocation_correct_count += 1
 
         # Action Agreement
@@ -87,21 +93,27 @@ def score_allocation(
         # Risk Flag Recall
         generated_flags: Set[str] = set(generated_data.risk_flags)
         truth_flags: Set[str] = set(truth_data.expected_risk_flags)
-        
+
         true_positives = len(generated_flags.intersection(truth_flags))
-        
+
         if not truth_flags:
             # If there are no ground truth flags, perfect recall if no flags were generated
             recall = 1.0 if not generated_flags else 0.0
         else:
             recall = true_positives / len(truth_flags)
-        
+
         total_recall_score += recall
 
     # 3. Final Score Calculation
     return EvaluationScores(
         budget_constraint_passed=budget_constraint_passed,
-        allocation_accuracy=(allocation_correct_count / num_campaigns_in_ground_truth) if num_campaigns_in_ground_truth > 0 else 0.0,
-        action_agreement=(action_correct_count / num_campaigns_in_ground_truth) if num_campaigns_in_ground_truth > 0 else 0.0,
-        risk_flag_recall=(total_recall_score / num_campaigns_in_ground_truth) if num_campaigns_in_ground_truth > 0 else 0.0,
+        allocation_accuracy=(allocation_correct_count / num_campaigns_in_ground_truth)
+        if num_campaigns_in_ground_truth > 0
+        else 0.0,
+        action_agreement=(action_correct_count / num_campaigns_in_ground_truth)
+        if num_campaigns_in_ground_truth > 0
+        else 0.0,
+        risk_flag_recall=(total_recall_score / num_campaigns_in_ground_truth)
+        if num_campaigns_in_ground_truth > 0
+        else 0.0,
     )
