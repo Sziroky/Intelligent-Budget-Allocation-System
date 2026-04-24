@@ -15,8 +15,8 @@ class StrategyAction(str, Enum):
     PAUSE = "pause"
 
 
-class MetricBucket(str, Enum):
-    """Buckets for metrics (ROAS, CPA, etc.)."""
+class Grades(str, Enum):
+    """Buckets for grades (ROAS, CPA, etc.)."""
 
     LOW = "low"
     RELATIVELY_LOW = "relatively_low"
@@ -51,6 +51,9 @@ class CampaignProfile(BaseModel):
     """
 
     campaign_id: str = Field(description="Reference to the campaign")
+    platform: Optional[str] = Field(
+        description="Advertising platform - TikTok, Meta, Google"
+    )
     # Campaign Statistic and z-scores
     roas_zscore: Optional[float] = Field(description="Z-score for ROAS")
     cpa_zscore: Optional[float] = Field(description="Z-score for CPA")
@@ -59,10 +62,10 @@ class CampaignProfile(BaseModel):
         description="Audience saturation grade"
     )
     # Graded roas and cpa
-    roas_grade: MetricBucket = Field(
+    roas_grade: Grades = Field(
         description="ROAS bucketed as low/rel. low/medium/rel. high/high"
     )
-    cpa_grade: MetricBucket = Field(
+    cpa_grade: Grades = Field(
         description="CPA bucketed as low/rel. low/medium/rel. high/high (lower is better)"
     )
     # Brief analysis (filled by LLM)
@@ -73,9 +76,9 @@ class CampaignProfile(BaseModel):
     recommended_action: Optional[StrategyAction] = None
     rationale: Optional[str] = None
 
-    @field_validator("cpa_bucket")
+    @field_validator("cpa_grade")
     @classmethod
-    def validate_cpa_bucket(cls, v: MetricBucket) -> MetricBucket:
+    def validate_cpa_bucket(cls, v: Grades) -> Grades:
         """Validate that cpa_bucket is set."""
         if v is None:
             raise ValueError("CPA bucket must be set")

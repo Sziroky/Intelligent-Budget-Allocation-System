@@ -6,9 +6,8 @@ Mainly will be used to generate new data.
 """
 
 from enum import Enum
-from typing import List
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CampaignType(str, Enum):
@@ -51,10 +50,3 @@ class Campaign(BaseModel):
     audience_saturation_signal: float
     platform_level_budget_cap: float
     min_viable_spend: float
-
-
-class Campaigns(BaseModel):
-    """The Campaigns Model"""
-
-    total_weekly_budget: float
-    campaigns: List[Campaign]
