@@ -54,6 +54,16 @@ class CampaignProfile(BaseModel):
     platform: Optional[str] = Field(
         description="Advertising platform - TikTok, Meta, Google"
     )
+    # Original Campaign Data needed for allocation
+    min_viable_spend: float = Field(
+        description="Minimum spend required for the campaign to be viable."
+    )
+    platform_level_budget_cap: float = Field(
+        description="Maximum budget that can be allocated to this campaign's platform."
+    )
+    current_weekly_spend: float = Field(
+        description="Current weekly spend of the campaign."
+    )
     # Campaign Statistic and z-scores
     roas_zscore: Optional[float] = Field(description="Z-score for ROAS")
     cpa_zscore: Optional[float] = Field(description="Z-score for CPA")

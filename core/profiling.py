@@ -2,7 +2,13 @@
 
 from typing import List
 
-from core.models.CampaignProfile import CampaignProfile, Grades, SaturationGrade
+from core.llms.GoogleLLM import AnalysisResponseSchema
+from core.models.CampaignProfile import (
+    BriefMention,
+    CampaignProfile,
+    Grades,
+    SaturationGrade,
+)
 from core.models.Campaigns import CampaignsData
 from core.models.CampaignsProfile import CampaignsStatistics
 from utils.statistics import calc_average, calc_standard_deviation, calc_zscore
@@ -75,6 +81,9 @@ def create_campaign_profiles(
         profile = CampaignProfile(
             campaign_id=campaign.campaign_id,
             platform=campaign.platform,
+            min_viable_spend=campaign.min_viable_spend,
+            platform_level_budget_cap=campaign.platform_level_budget_cap,
+            current_weekly_spend=campaign.current_weekly_spend,
             roas_zscore=round(roas_z, 2),
             cpa_zscore=round(cpa_z, 2),
             roas_trend=campaign.four_week_roas_trend.value,
@@ -89,6 +98,27 @@ def create_campaign_profiles(
         profiles.append(profile)
 
     return profiles
+
+
+def enrich_profiles_with_llm_insights(
+    profiles: List[CampaignProfile], analysis_results: AnalysisResponseSchema
+) -> List[CampaignProfile]:
+    """
+    Integrates the LLM's analysis into the existing campaign profiles.
+    """
+    profile_map = {profile.campaign_id: profile for profile in profiles}
+    for analysis in analysis_results.analyses:
+        if analysis.campaign_id in profile_map:
+            profile = profile_map[analysis.campaign_id]
+            profile.brief_mention = BriefMention(
+                is_mentioned=analysis.is_mentioned,
+                quote=analysis.quote,
+                semantic_analysis=analysis.semantic_analysis,
+            )
+            profile.conflicts_in_brief = analysis.conflicts_in_brief
+            profile.recommended_action = analysis.recommended_action
+            profile.rationale = analysis.rationale
+    return list(profile_map.values())
 
 
 if __name__ == "__main__":
