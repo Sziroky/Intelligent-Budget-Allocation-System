@@ -8,7 +8,7 @@ Mainly will be used to generate new data.
 from enum import Enum
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class CampaignType(str, Enum):
@@ -38,12 +38,14 @@ class RoasTrend(str, Enum):
 class Campaign(BaseModel):
     """The Single Campaign Model."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     campaign_id: str
     platform: Platform
     campaign_type: CampaignType
     current_weekly_spend: float
     roas: float
-    four_weeks_roas_trend: RoasTrend
+    four_week_roas_trend: RoasTrend = Field(alias="4_week_roas_trend")
     cpa: float
     conversion_volume: float
     audience_saturation_signal: float
