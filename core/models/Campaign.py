@@ -6,6 +6,7 @@ Mainly will be used to generate new data.
 """
 
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -41,12 +42,12 @@ class Campaign(BaseModel):
 
     campaign_id: str
     platform: Platform
-    campaign_type: CampaignType
+    campaign_type: Optional[CampaignType] = None
     current_weekly_spend: float
     roas: float
     four_week_roas_trend: RoasTrend = Field(alias="4_week_roas_trend")
-    cpa: float
-    conversion_volume: float
+    cpa: Optional[float] = None
+    conversion_volume: Optional[float] = None
     audience_saturation_signal: float
     platform_level_budget_cap: float
     min_viable_spend: float
