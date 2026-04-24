@@ -115,3 +115,24 @@ The system should be evaluated with Eval Harness layer here are some of the crit
 - **Risk flag recall**: did the system catch the same risk flags a human identified? 
 - **Total budget constraint**: hard fail if total ≠ $85,000 
 
+### The flow of the system:
+The flow of this function is as follows:
+    1. Load the campagn data and parse it into objects.
+    2. Create initial campaign data profiles using statistics (z-scores) and descriptive categories (for LLM).
+    3. Send the initial profiles into LLM and ask to analyze the strategy brief based on that fill the LLM-origin fields in the profiles (priorities, rationale, strategy).
+    4. Based on the statistical and LLM insights we will allocate the budget but deterministically not stochastically.
+    5. We Create a list of Campaings that are not paused.
+    6. We sort the list based on pririties assigned by the LLM.
+    7. We allocate the minimum spend of each campagn and check if not exceed 85,000 budget.
+    8. If we are we drop the last campaign and check the rest (Not ideal and not preffered approach)
+    9. We then have a list of campaigns and their budget allocations.
+    10. We calculate how much part of the 85 grant we give to each campaign.
+        Formula:
+        ((Weight ROAS z-score) - (Weight CPA z-score) + (Weight * (1 - Saturation))) * (LLM Priority) * (ROAS Trend Multiplier)
+    11. Evaluation of the final result allocation
+
+## Results
+
+Unfortunatelly, The system is not ready yet it orchestrate a i designed but there are critical errors within it i want to recognize and fix in future. The main issue is that the evaluation is not correct so each case is different. Why its not working propably bedcause the formula to allocate the budget was creatively invented and not based on any research 
+
+To be continued...
