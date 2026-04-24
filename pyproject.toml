@@ -5,5 +5,7 @@ description = "This is a Test Task Repository for DelveDeeper AI Enginner positi
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "google-genai>=1.73.1",
     "pydantic>=2.13.3",
+    "python-dotenv>=1.2.2",
 ]
