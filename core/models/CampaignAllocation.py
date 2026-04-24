@@ -1,22 +1,10 @@
 """The result of the deterministic + LLM insights allocation system."""
 
-from enum import Enum
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-
-class Action(str, Enum):
-    SCALE = "scale"
-    HOLD = "hold"
-    REDUCE = "reduce"
-    PAUSE = "pause"
-
-
-class RiskFlag(str, Enum):
-    VOLATILITY = "volatility"
-    PLATFORM_CONCENTRATION = "platform_concentration"
-    BELOW_MIN_SPEND = "below_min_spend"
+from core.models.CampaignProfile import StrategyAction
 
 
 class CampaignAllocation(BaseModel):
@@ -25,7 +13,7 @@ class CampaignAllocation(BaseModel):
     campaign_id: str
     recommended_spend: int
     delta_vs_current: int
-    action: Action
+    action: StrategyAction
     opportunity_cost_note: str
-    risk_flags: List[RiskFlag]
+    risk_flags: List[str] = Field(default_factory=list)
     rationale: str
