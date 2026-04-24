@@ -4,8 +4,8 @@ from typing import List
 
 from pydantic import BaseModel
 
-from .AllocationSummary import AllocationSummary
-from .CampaignAllocation import CampaignAllocation
+from core.models.AllocationSummary import AllocationSummary
+from core.models.CampaignAllocation import CampaignAllocation
 
 
 class FinalResult(BaseModel):

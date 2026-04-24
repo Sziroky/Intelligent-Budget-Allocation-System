@@ -8,7 +8,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from .Campaign import Campaign
+from core.models.Campaign import Campaign
 
 
 class CampaignsData(BaseModel):
