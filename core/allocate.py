@@ -1,18 +1,14 @@
 """Deterministic budget allocation logic."""
 
-from typing import Dict, List, Optional
-
-from pydantic import BaseModel, Field
+from typing import Dict, List
 
 from core.models.AllocationSummary import AllocationSummary
-from core.models.CampaignAllocation import CampaignAllocation
 from core.models.Campaign import RoasTrend
-from core.models.CampaignProfile import CampaignProfile, SaturationGrade, StrategyAction
+from core.models.CampaignAllocation import CampaignAllocation
+from core.models.CampaignProfile import CampaignProfile, StrategyAction
 from core.models.FinalResult import FinalResult
 from utils.indexes import calculate_hhi
 
-
-# --- Core Allocation Logic ---
 
 def _calculate_performance_score(profile: CampaignProfile) -> float:
     """
@@ -20,14 +16,14 @@ def _calculate_performance_score(profile: CampaignProfile) -> float:
     This score combines raw performance, strategic priority, and trend momentum.
     """
     llm_priority = 1
-    if profile.brief_mention and hasattr(profile.brief_mention, 'priority'):
+    if profile.brief_mention and hasattr(profile.brief_mention, "priority"):
         llm_priority = profile.brief_mention.priority
 
     # 1. Base Performance Score (Weights can be tuned)
     w_roas = 0.5
     w_cpa = 0.3
     w_saturation = 0.2
-    
+
     # Use the raw audience_saturation_signal (float) from the profile
     saturation_value = profile.audience_saturation_signal
 
@@ -37,19 +33,18 @@ def _calculate_performance_score(profile: CampaignProfile) -> float:
         + (w_saturation * (1 - saturation_value))
     )
 
-    # 2. LLM Priority Score (Strategic Multiplier)
+    # 2. LLM Priority Score
     priority_multiplier = llm_priority
 
-    # 3. Trend Multiplier (Risk/Momentum)
+    # 3. Trend Multiplier
     trend_multiplier = 1.0
     if profile.roas_trend == RoasTrend.DECLINING:
         trend_multiplier = 0.8
     elif profile.roas_trend == RoasTrend.RISING:
         trend_multiplier = 1.2
-    # else: flat trend is 1.0
 
     score = base_performance * priority_multiplier * trend_multiplier
-    print(f"DEBUG: Score for {profile.campaign_id}: {score:.2f}") # DEBUG
+    print(f"DEBUG: Score for {profile.campaign_id}: {score:.2f}")  # DEBUG
     return score
 
 
@@ -60,25 +55,20 @@ def allocate_budget(
     Allocates the total budget using a single performance score and a two-phase
     deficit/surplus balancing algorithm.
     """
-    # --- Phase 1: Handle Deficit by Pausing Lowest Performers ---
 
     # Calculate performance score for each profile
-    scored_profiles = [ (p, _calculate_performance_score(p)) for p in profiles ]
+    scored_profiles = [(p, _calculate_performance_score(p)) for p in profiles]
 
-    # Tentatively allocate min_viable_spend to everyone
+    # Allocate min_viable_spend to everyone
     tentative_allocations = {
         p.campaign_id: p.min_viable_spend for p, score in scored_profiles
     }
-    
+
     current_budget_after_min_spend = sum(tentative_allocations.values())
 
     # Sort campaigns by score, worst to first, to decide who to cut if needed
     sorted_for_cutting = sorted(scored_profiles, key=lambda item: item[1])
 
-    # NOTE: As discussed, this iterative pausing is a greedy algorithm. It's
-    # transparent and effective, but might not be globally optimal. For instance,
-    # pausing one expensive, low-scoring campaign might be better than pausing
-    # two cheaper, even-lower-scoring campaigns. This is a known trade-off.
     for profile, score in sorted_for_cutting:
         if current_budget_after_min_spend <= total_budget:
             break
@@ -88,12 +78,8 @@ def allocate_budget(
         tentative_allocations[profile.campaign_id] = 0
         current_budget_after_min_spend -= reclaimed_budget
 
-    # --- Phase 2: Distribute Surplus ---
-
     active_allocations = {
-        cid: spend
-        for cid, spend in tentative_allocations.items()
-        if spend > 0
+        cid: spend for cid, spend in tentative_allocations.items() if spend > 0
     }
     active_profiles = {
         p.campaign_id: (p, score)
@@ -113,7 +99,7 @@ def allocate_budget(
 
         if total_performance_score_for_surplus > 0:
             for cid, (profile, score) in active_profiles.items():
-                if score <= 0: # Only give surplus to positive-scoring campaigns
+                if score <= 0:  # Only give surplus to positive-scoring campaigns
                     continue
 
                 current_spend = active_allocations[cid]
@@ -147,9 +133,7 @@ def allocate_budget(
 
     total_allocated_final = sum(final_allocations.values())
     print(f"DEBUG: Total allocated after final normalization: {total_allocated_final}")
-    print(f"DEBUG: Final Allocations: {final_allocations}") # DEBUG
-
-    # --- Phase 3: Finalization & Flagging ---
+    print(f"DEBUG: Final Allocations: {final_allocations}")  # DEBUG
 
     final_campaign_allocations: List[CampaignAllocation] = []
     platform_spends: Dict[str, float] = {}
@@ -203,7 +187,9 @@ def allocate_budget(
                 rationale=profile.rationale or "No rationale provided.",
             )
         )
-        print(f"DEBUG: Campaign {profile.campaign_id}: Recommended Spend = {recommended_spend}, Delta = {delta}, Flags = {risk_flags}")
+        print(
+            f"DEBUG: Campaign {profile.campaign_id}: Recommended Spend = {recommended_spend}, Delta = {delta}, Flags = {risk_flags}"
+        )
 
     # Calculate HHI
     hhi_score = calculate_hhi(list(final_allocations.values()))
@@ -213,12 +199,14 @@ def allocate_budget(
         concentration_score=round(hhi_score, 4),
         concentration_warning=hhi_score > 0.25,
         total_allocated=round(total_budget),
-        unresolved_conflicts=list(set(
-            conflict
-            for p in profiles
-            if p.conflicts_in_brief
-            for conflict in p.conflicts_in_brief
-        )),
+        unresolved_conflicts=list(
+            set(
+                conflict
+                for p in profiles
+                if p.conflicts_in_brief
+                for conflict in p.conflicts_in_brief
+            )
+        ),
     )
 
     return FinalResult(allocations=final_campaign_allocations, summary=summary)
