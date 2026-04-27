@@ -1,4 +1,7 @@
-"""Scoring and bucketing logic for campaigns."""
+"""Creating profiles for each campaign based on statistics and LLM insights.
+
+The key concept here is to translate raw campaign data into profiles describing the campaign.
+"""
 
 from typing import List
 
@@ -17,12 +20,13 @@ from utils.statistics import calc_average, calc_standard_deviation, calc_zscore
 def map_zscore(z_score: float, inverse: bool = False) -> Grades:
     """
     Maps Z-score value into descriptive value.
+    The z score normalize the values because the information of ROAS being high or not is ambigous and relative to other campaigns.
 
     ARGS:
     - z_score: The Z-score to be mapped.
     - inverse: If True, higher Z-scores will be mapped to lower grades f.e CPA z-score - lower is better
     """
-    # Logical inversion
+    # Logical inversion if you want high values to be considered worse.
     val = -z_score if inverse else z_score
 
     if val >= 1.5:
@@ -76,7 +80,9 @@ def create_campaign_profiles(
         roas_z = calc_zscore(
             campaign.roas or 0.0, statistics.average_roas, statistics.std_roas
         )
-        cpa_z = calc_zscore(campaign.cpa or 0.0, statistics.average_cpa, statistics.std_cpa)
+        cpa_z = calc_zscore(
+            campaign.cpa or 0.0, statistics.average_cpa, statistics.std_cpa
+        )
 
         profile = CampaignProfile(
             campaign_id=campaign.campaign_id,
